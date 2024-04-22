@@ -22,7 +22,7 @@ typedef struct {
     Service services[10];
     int service_count;
     double total_cost;
-    double service_charge; // Total cost + tax
+    double service_charge; 
 } MaintenanceRecord;
 
 void add_new_maintenance() {
@@ -34,15 +34,15 @@ void add_new_maintenance() {
     printf("New Maintenance\n");
     printf("Bike's Manufacturer: ");
     fgets(record.bike.manufacturer, sizeof(record.bike.manufacturer), stdin);
-    strtok(record.bike.manufacturer, "\n"); // Remove newline
+    strtok(record.bike.manufacturer, "\n"); 
 
     printf("Bike's Model: ");
     fgets(record.bike.model, sizeof(record.bike.model), stdin);
-    strtok(record.bike.model, "\n"); // Remove newline
+    strtok(record.bike.model, "\n"); 
 
     printf("Chassis Number (max 17 characters): ");
     fgets(record.bike.chassis, sizeof(record.bike.chassis), stdin);
-    strtok(record.bike.chassis, "\n"); // Remove newline
+    strtok(record.bike.chassis, "\n");
 
     char proceed;
     printf("Proceed (Y/N): ");
@@ -57,11 +57,11 @@ void add_new_maintenance() {
     while (1) {
         printf("Enter a Service: ");
         fgets(record.services[record.service_count].description, sizeof(record.services[record.service_count].description), stdin);
-        strtok(record.services[record.service_count].description, "\n"); // Remove newline
+        strtok(record.services[record.service_count].description, "\n"); 
 
         printf("Enter Service Charge: ");
         scanf("%lf", &record.services[record.service_count].charge);
-        getchar(); // Consume newline
+        getchar(); 
 
         record.total_cost += record.services[record.service_count].charge;
         record.service_count++;
@@ -69,22 +69,21 @@ void add_new_maintenance() {
         char add_more;
         printf("Do you want to enter more services (Y/N): ");
         scanf(" %c", &add_more);
-        getchar(); // Consume newline
+        getchar();
 
         if (add_more != 'Y' && add_more != 'y') {
             break;
         }
     }
 
-    // Calculate service charge including tax
-    record.service_charge = record.total_cost + (record.total_ ncost * TAX_RATE);
+    record.service_charge = record.total_cost + (record.total_cost * TAX_RATE);
 
     printf("1. Save the service record\n");
     printf("2. Print Bill\n");
 
     int choice;
     scanf("%d", &choice);
-    getchar(); // Consume newline
+    getchar();
 
     FILE *file = fopen(MAINTENANCE_FILE, "a");
     if (!file) {
@@ -92,15 +91,15 @@ void add_new_maintenance() {
         return;
     }
 
-    // Store data in file
+    
     fprintf(file, "%s,%s,%s,", record.bike.manufacturer, record.bike.model, record.bike.chassis);
 
-    // List of services and charges
+
     for (int i = 0; i < record.service_count; i++) {
         fprintf(file, "\"%s, %.2f\",", record.services[i].description, record.services[i].charge);
     }
 
-    // Write total cost and service charge
+
     fprintf(file, "%.2f, %.2f\n", record.total_cost, record.service_charge);
 
     if (choice == 2) {
@@ -120,6 +119,47 @@ void add_new_maintenance() {
     printf("Record saved successfully.\n");
 }
 
+// void view_maintenance_history() {
+//     FILE *file = fopen(MAINTENANCE_FILE, "r");
+//     if (!file) {
+//         printf("Error opening file!\n");
+//         return;
+//     }
+
+//     printf("1. View all history\n");
+//     printf("2. Search by chassis number\n");
+
+//     int choice;
+//     scanf("%d", &choice);
+//     getchar(); // Consume newline
+
+//     if (choice == 1) {
+//         char line[256];
+//         printf("\nMaintenance History:\n");
+//         while (fgets(line, sizeof(line), file)) {
+//             printf("%s", line);
+//         }
+//     } else if (choice == 2) {
+//         char chassis[CHASSIS_MAX_LENGTH + 1];
+//         printf("Enter Chassis Number: ");
+//         fgets(chassis, sizeof(chassis), stdin);
+//         strtok(chassis, "\n"); // Remove newline
+
+//         printf("\nMaintenance Records for Chassis Number: %s\n", chassis);
+
+//         char line[256];
+//         while (fgets(line, sizeof(line), file)) {
+//             if (strstr(line, chassis)) {
+//                 printf("%s", line);
+//             }
+//         }
+//     } else {
+//         printf("Invalid choice.\n");
+//     }
+
+//     fclose(file);
+// }
+
 void view_maintenance_history() {
     FILE *file = fopen(MAINTENANCE_FILE, "r");
     if (!file) {
@@ -132,26 +172,61 @@ void view_maintenance_history() {
 
     int choice;
     scanf("%d", &choice);
-    getchar(); // Consume newline
+    getchar(); 
 
     if (choice == 1) {
-        char line[256];
         printf("\nMaintenance History:\n");
+        printf("%-15s %-15s %-17s %-40s %-10s %-10s\n", "Manufacturer", "Model", "Chassis", "Services", "Total Cost", "Service Charge");
+
+        char line[256];
         while (fgets(line, sizeof(line), file)) {
-            printf("%s", line);
+            char *token = strtok(line, ",");
+            printf("%-15s ", token);
+
+            token = strtok(NULL, ",");
+            printf("%-15s ", token);
+
+            token = strtok(NULL, ",");
+            printf("%-17s ", token);
+
+            printf("%-40s ", token + 1); 
+
+            token = strtok(NULL, ",");
+            printf("%-10s ", token); 
+
+            token = strtok(NULL, ",");
+            printf("%-10s\n", token); 
         }
+
     } else if (choice == 2) {
         char chassis[CHASSIS_MAX_LENGTH + 1];
         printf("Enter Chassis Number: ");
         fgets(chassis, sizeof(chassis), stdin);
-        strtok(chassis, "\n"); // Remove newline
+        strtok(chassis, "\n");
 
         printf("\nMaintenance Records for Chassis Number: %s\n", chassis);
+        printf("%-15s %-15s %-17s %-40s %-10s %-10s\n", "Manufacturer", "Model", "Chassis", "Services", "Total Cost", "Service Charge");
 
         char line[256];
         while (fgets(line, sizeof(line), file)) {
             if (strstr(line, chassis)) {
-                printf("%s", line);
+                char *token = strtok(line, ",");
+                printf("%-15s ", token);
+
+                token = strtok(NULL, ",");
+                printf("%-15s ", token); 
+
+                token = strtok(NULL, ",");
+                printf("%-17s ", token); 
+
+                token = strtok(NULL, ",");
+                printf("%-40s ", token + 1); 
+
+                token = strtok(NULL, ",");
+                printf("%-10s ", token); 
+
+                token = strtok(NULL, ",");
+                printf("%-10s\n", token);
             }
         }
     } else {
@@ -160,6 +235,7 @@ void view_maintenance_history() {
 
     fclose(file);
 }
+
 
 int main() {
     int choice;
@@ -171,7 +247,7 @@ int main() {
         printf("3. Exit\n");
 
         scanf("%d", &choice);
-        getchar(); // Consume newline
+        getchar();
 
         switch (choice) {
             case 1:
